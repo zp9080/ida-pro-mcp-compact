@@ -112,8 +112,6 @@ class IdaMcpHttpRequestHandler(McpHttpRequestHandler):
         path = parsed.path
 
         if path == "/config.html":
-            if not self._check_host():
-                return
             self._handle_config_get()
             return
 
@@ -168,23 +166,6 @@ class IdaMcpHttpRequestHandler(McpHttpRequestHandler):
         port = self.server_port
         if origin not in (f"http://127.0.0.1:{port}", f"http://localhost:{port}"):
             self.send_error(403, "Invalid Origin")
-            return False
-        return True
-
-    def _check_host(self) -> bool:
-        """
-        Prevents DNS rebinding attacks where an attacker's domain (e.g., evil.com)
-        resolves to 127.0.0.1, allowing their page to read localhost resources.
-        """
-        host = self.headers.get("Host")
-        port = self.server_port
-        allowed_hosts = [
-            f"127.0.0.1:{port}",
-            f"localhost:{port}",
-            f"host.docker.internal:{port}",
-        ]
-        if host not in allowed_hosts:
-            self.send_error(403, "Invalid Host")
             return False
         return True
 
